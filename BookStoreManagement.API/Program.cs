@@ -8,11 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
-string connectionString = builder.Configuration.GetConnectionString("BookPublisher");
-
 builder.Services.AddDbContext<BookStoreDBContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-);
+{
+    var defaultConnectionString = builder.Configuration.GetConnectionString("BOOK_STORE_CONNECTION_STRING");
+    options.UseMySql(defaultConnectionString, ServerVersion.AutoDetect(defaultConnectionString));
+});
 
 var app = builder.Build();
 
