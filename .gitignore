@@ -351,7 +351,7 @@ MigrationBackup/
 .ionide/
 
 appsettings.Local.json
-Sumdocs.API/appsettings.Local.json
-/Sumdocs.API/appsettings.Local.json
+BookStoreManagement/appsettings.Local.json
+/BookStoreManagement.API/appsettings.Local.json
 BookStoreManagement/BookStoreManagement.sln
 BookStoreManagement.API/appsettings.Local.json
