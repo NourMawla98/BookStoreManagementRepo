@@ -20,7 +20,7 @@ namespace BookStoreManagement.Domain.Models
         public int AuthorId { get; set; }
 
         [ForeignKey(nameof(AuthorId))]
-        public virtual Author Author { get; set; }
+        public virtual Author? Author { get; set; }
 
         public List<BookPublisher> Publishers { get; set; } = new List<BookPublisher>();
     }
