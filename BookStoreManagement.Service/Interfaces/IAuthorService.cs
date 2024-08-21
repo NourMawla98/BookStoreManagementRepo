@@ -2,21 +2,21 @@
 
 namespace BookStoreManagement.Service.Interfaces
 {
-    public interface IAuthorService
+    public interface IBookService
     {
-        // Retrieve a list of all authors
-        Task<IEnumerable<GetAuthorDTO>> GetAuthorsAsync();
+        // Retrieve a list of all books
+        Task<IEnumerable<GetPublisherDTO>> GetBooksAsync();
 
-        // Retrieve a specific author by ID
-        Task<GetAuthorDTO> GetAuthorByIdAsync(int id);
+        // Retrieve a specific book by ID
+        Task<GetPublisherDTO> GetBookByIdAsync(int id);
 
-        // Add a new author
-        Task<GetAuthorDTO> AddAuthorAsync(AddAuthorDTO authorDto);
+        // Add a new book
+        Task<GetPublisherDTO> AddBookAsync(AddBookDTO bookDto);
 
-        // Update an existing author
-        Task<bool> UpdateAuthorAsync(GetAuthorDTO authorDto);
+        // Update an existing book
+        Task<bool> UpdateBookAsync(GetBookDTO bookDto);
 
-        // Delete an author by ID
-        Task<bool> DeleteAuthorAsync(int id);
+        // Delete a book by ID
+        Task<bool> DeleteBookAsync(int id);
     }
 }

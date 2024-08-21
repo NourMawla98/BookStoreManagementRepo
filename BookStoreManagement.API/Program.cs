@@ -17,7 +17,20 @@ builder.Services.AddDbContext<BookStoreDBContext>(options =>
 });
 
 builder.Services.AddScoped<IBookStoreRepository, BookStoreRepository>();
+
+// upcoming below: dependency injections lal services li 3mlnenun implement
+// Registering AuthorService
 builder.Services.AddScoped<IAuthorService, AuthorService>();
+
+// Registering BookService
+builder.Services.AddScoped<IBookService, BookService>();
+
+// Registering PublisherService
+builder.Services.AddScoped<IPublisherService, PublisherService>();
+
+// Registering BookPublisherService
+builder.Services.AddScoped<IBookPublisherService, BookPublisherService>();
+
 
 //Mapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));

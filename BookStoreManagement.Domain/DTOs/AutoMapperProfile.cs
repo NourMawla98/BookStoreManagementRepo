@@ -24,7 +24,7 @@ public class AutoMapperProfile : Profile
         #endregion Mapping for Author
 
         // Mapping for BookPublisher
-        CreateMap<BookPublisher, BookPublisherDto>()
+        CreateMap<BookPublisher, AddBookPublisherDTO>()
             .ReverseMap();
 
         // Mapping for Publisher
