@@ -10,7 +10,7 @@ public class AutoMapperProfile : Profile
         //example usage:var authorDto = mapper.Map<AuthorDto>(author); yaane lmfroud hk
 
         // Mapping for Book
-        CreateMap<Book, BookDto>()
+        CreateMap<Book, AddBookDTO>()
             .ReverseMap();
 
         #region Mapping for Author
@@ -28,7 +28,10 @@ public class AutoMapperProfile : Profile
             .ReverseMap();
 
         // Mapping for Publisher
-        CreateMap<Publisher, PublisherDto>()
+        CreateMap<Publisher, AddPublisherDTO>()
             .ReverseMap();
+
+        CreateMap<Publisher, AddBookPublisherDTO>()
+          .ReverseMap();
     }
 }

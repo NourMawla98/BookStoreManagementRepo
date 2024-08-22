@@ -39,7 +39,7 @@ namespace BookStoreManagement.Service.Services
             return _mapper.Map<GetPublisherDTO>(newBook);
         }
 
-        public async Task<bool> UpdateBookAsync(GetPublisherDTO bookDto)
+        public async Task<bool> UpdateBookAsync(GetBookDTO bookDto)
         {
             var book = await _bookRepository.GetAll<Book>().FirstOrDefaultAsync(b => b.Id == bookDto.Id) ??
                 throw new BadHttpRequestException("Book not found", (int)HttpStatusCode.NotFound);

@@ -22,6 +22,7 @@ namespace BookStoreManagement.Domain.Models
         [ForeignKey(nameof(AuthorId))]
         public virtual Author? Author { get; set; }
 
+
         public List<BookPublisher> Publishers { get; set; } = new List<BookPublisher>();
     }
 }

@@ -50,6 +50,19 @@ namespace BookStoreManagement.Service.Services
             return _mapper.Map<GetBookPublisherDTO>(bookPublisher);
         }
 
+        public async Task<bool> UpdateBookPublisherPriceAsync(int bookId, int publisherId, decimal newPrice)
+        {
+            var bookPublisher = await _repository.GetAll<BookPublisher>()
+                .FirstOrDefaultAsync(bp => bp.BookId == bookId && bp.PublisherId == publisherId);
+
+            if (bookPublisher == null)
+                throw new BadHttpRequestException("BookPublisher relationship not found", (int)HttpStatusCode.NotFound);
+
+            bookPublisher.Price = newPrice;
+            await _repository.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteBookPublisherAsync(int bookId, int publisherId)
         {
             var bookPublisher = await _repository.GetAll<BookPublisher>()

@@ -15,6 +15,9 @@ namespace BookStoreManagement.Domain.Models
         [Column("location"), Required, MaxLength(250)]
         public string Location { get; set; } = String.Empty;
 
-        public IList<Book> PublishedBooks { get; set; } = new List<Book>();
+       
+
+        public virtual ICollection<BookPublisher> PublishedBooks { get; set; }
+
     }
 }
