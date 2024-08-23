@@ -19,25 +19,70 @@ namespace BookStoreManagement.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<GetPublisherDTO>> GetBooksAsync()
+        public async Task<IEnumerable<GetBookDTO>> GetBooksAsync()
         {
             var books = await _bookRepository.GetAll<Book>().ToListAsync();
-            return _mapper.Map<IEnumerable<GetPublisherDTO>>(books);
+            return _mapper.Map<IEnumerable<GetBookDTO>>(books);
         }
 
-        public async Task<GetPublisherDTO> GetBookByIdAsync(int id)
+        public async Task<GetBookDTO> GetBookByIdAsync(int id)
         {
-            var book = await _bookRepository.GetAll<Book>().FirstOrDefaultAsync(b => b.Id == id);
-            return _mapper.Map<GetPublisherDTO>(book);
+            // Fetch the book including related author and publishers
+            var book = await _bookRepository.GetAll<Book>()
+                .Include(b => b.Author) // Include the Author
+                .Include(b => b.Publishers) // Include BookPublishers to get Publisher details
+                    .ThenInclude(bp => bp.Publisher) // Include the Publisher details
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (book == null)
+            {
+                throw new BadHttpRequestException("Book not found", (int)HttpStatusCode.NotFound);
+            }
+
+            // Map the book entity to GetBookDTO
+            var bookDto = _mapper.Map<GetBookDTO>(book);
+
+            // Set the AuthorName and PublisherNames in the DTO
+            bookDto.AuthorName = book.Author?.Name; // Assuming the Author has a Name property
+            bookDto.PublisherNames = book.Publishers
+                                       .Select(bp => bp.Publisher.Name) // Assuming Publisher has a Name property
+                                       .ToList();
+
+            return bookDto;
         }
 
-        public async Task<GetPublisherDTO> AddBookAsync(AddBookDTO bookDto)
+        public async Task<GetBookDTO> AddBookAsync(AddBookDTO bookDto)
         {
+            // Map DTO to Book entity
             var newBook = _mapper.Map<Book>(bookDto);
+
+            // Add the book to the repository
             _bookRepository.Add(newBook);
             await _bookRepository.SaveChangesAsync();
-            return _mapper.Map<GetPublisherDTO>(newBook);
+
+            // After saving the book, associate it with publishers
+            if (bookDto.PublisherIds != null && bookDto.PublisherIds.Any())
+            {
+                foreach (var publisherId in bookDto.PublisherIds)
+                {
+                    // Create a new BookPublisher entry for each publisherId
+                    var bookPublisher = new BookPublisher
+                    {
+                        BookId = newBook.Id,
+                        PublisherId = publisherId
+                    };
+
+                    _bookRepository.Add(bookPublisher); //adding to repo
+                }
+
+                // Save changes for the BookPublisher associations
+                await _bookRepository.SaveChangesAsync();
+            }
+
+            // Map the result to GetBookDTO
+            return _mapper.Map<GetBookDTO>(newBook);
         }
+
 
         public async Task<bool> UpdateBookAsync(GetBookDTO bookDto)
         {

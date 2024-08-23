@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace BookStoreManagement.Domain.DTOs
+﻿namespace BookStoreManagement.Domain.DTOs
 {
-    public class GetAuthorDTO : AddAuthorDTO
+    public class GetAuthorDTO
     {
-        [Required, Range(1, int.MaxValue)]
         public int Id { get; set; }
+        public string Name { get; set; }
+
+        // This will hold a list of books associated with the author
+        public List<GetBookDTO> Books { get; set; }
     }
+
 }

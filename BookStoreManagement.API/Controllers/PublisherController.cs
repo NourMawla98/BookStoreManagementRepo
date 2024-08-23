@@ -16,18 +16,23 @@ namespace BookStoreManagement.API.Controllers
         }
 
         // GET: api/Publisher
+        // GET: api/Publisher
         [HttpGet]
         public async Task<IActionResult> GetPublishers()
         {
+          
             return Ok(await _publisherService.GetPublishersAsync());
         }
 
+        
         // GET: api/Publisher/5
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetPublisherById(int id)
         {
-            return Ok(await _publisherService.GetPublisherByIdAsync(id));
+            var publisher = await _publisherService.GetPublisherByIdAsync(id);
+            return Ok(publisher);
         }
+
 
         // POST: api/Publisher
         [HttpPost]
@@ -38,7 +43,7 @@ namespace BookStoreManagement.API.Controllers
 
         // PUT: api/Publisher/5
         [HttpPut]
-        public async Task<IActionResult> UpdatePublisher([FromBody] GetPublisherDTO publisherDto)
+        public async Task<IActionResult> UpdatePublisher([FromBody] GetPublisherListDTO publisherDto)
         {
             return Ok(await _publisherService.UpdatePublisherAsync(publisherDto));
         }

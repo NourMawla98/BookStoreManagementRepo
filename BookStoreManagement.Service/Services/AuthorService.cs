@@ -19,27 +19,42 @@ namespace BookStoreManagement.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<GetAuthorDTO>> GetAuthorsAsync()
+        public async Task<IEnumerable<GetAuthorListDTO>> GetAuthorsAsync()
         {
+            // Fetch all authors without their books
             var authors = await _authorRepository.GetAll<Author>().ToListAsync();
-            return _mapper.Map<IEnumerable<GetAuthorDTO>>(authors);
+
+            // Map to GetAuthorListDTO (no books included)
+            return _mapper.Map<IEnumerable<GetAuthorListDTO>>(authors);
         }
+
 
         public async Task<GetAuthorDTO> GetAuthorByIdAsync(int id)
         {
-            var author = await _authorRepository.GetAll<Author>().FirstOrDefaultAsync(a => a.Id == id);
+            // Fetch the author by id including related books
+            var author = await _authorRepository.GetAll<Author>()
+                                                .Include(a => a.Books) // Include the related books
+                                                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (author == null)
+            {
+                throw new BadHttpRequestException("Author not found", (int)HttpStatusCode.NotFound);
+            }
+
+            // Map to GetAuthorDTO which includes the list of books
             return _mapper.Map<GetAuthorDTO>(author);
         }
 
-        public async Task<GetAuthorDTO> AddAuthorAsync(AddAuthorDTO authorDto)
+
+        public async Task<GetAuthorListDTO> AddAuthorAsync(AddAuthorDTO authorDto)
         {
             var newAuthor = _mapper.Map<Author>(authorDto);
             _authorRepository.Add(newAuthor);
             await _authorRepository.SaveChangesAsync();
-            return _mapper.Map<GetAuthorDTO>(newAuthor);
+            return _mapper.Map<GetAuthorListDTO>(newAuthor);
         }
 
-        public async Task<bool> UpdateAuthorAsync(GetAuthorDTO authorDto)
+        public async Task<bool> UpdateAuthorAsync(GetAuthorListDTO authorDto)
         {
             var author = await _authorRepository.GetAll<Author>().FirstOrDefaultAsync(a => a.Id == authorDto.Id) ??
                 throw new BadHttpRequestException("Author not found", (int)HttpStatusCode.NotFound);
@@ -57,5 +72,6 @@ namespace BookStoreManagement.Service.Services
             await _authorRepository.SaveChangesAsync();
             return true;
         }
+
     }
 }

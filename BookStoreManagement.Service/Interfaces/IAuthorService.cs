@@ -4,10 +4,11 @@ namespace BookStoreManagement.Service.Interfaces
 {
     public interface IAuthorService
     {
-        Task<IEnumerable<GetAuthorDTO>> GetAuthorsAsync();
+        Task<IEnumerable<GetAuthorListDTO>> GetAuthorsAsync();
         Task<GetAuthorDTO> GetAuthorByIdAsync(int id);
-        Task<GetAuthorDTO> AddAuthorAsync(AddAuthorDTO authorDto);
-        Task<bool> UpdateAuthorAsync(GetAuthorDTO authorDto);
+      
+        Task<GetAuthorListDTO> AddAuthorAsync(AddAuthorDTO authorDto);
+        Task<bool> UpdateAuthorAsync(GetAuthorListDTO authorDto);
         Task<bool> DeleteAuthorAsync(int id);
     }
 }
