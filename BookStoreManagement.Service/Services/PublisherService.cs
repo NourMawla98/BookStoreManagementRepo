@@ -31,11 +31,14 @@ namespace BookStoreManagement.Service.Services
             // Save changes to the database
             await _publisherRepository.SaveChangesAsync();
 
-            // Map the newly added Publisher back to GetPublisherListDTO
-            var publisherDtoResult = _mapper.Map<GetPublisherListDTO>(newPublisher);
+            return await _publisherRepository.GetAll<Publisher>()
+                  .Where(p => p.Id == newPublisher.Id)
+                  .ProjectTo<GetPublisherListDTO>(_mapper.ConfigurationProvider)
+                  .FirstOrDefaultAsync();
 
-            return publisherDtoResult;
+
         }
+
 
         public async Task<IEnumerable<GetPublisherListDTO>> GetPublishersAsync()
         {

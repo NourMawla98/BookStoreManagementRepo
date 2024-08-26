@@ -12,11 +12,18 @@ namespace BookStoreManagement.Service.Helpers.AutoMapper
             CreateMap<Book, AddBookDTO>()
                 .ReverseMap();
 
-            CreateMap<Book, GetPublisherBookDTO>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name)); // Map AuthorName
-                                                                                                 //.ForMember(dest => dest.PublisherNames, opt => opt.MapFrom(src => src.Publishers.Select(bp => bp.Publisher.Name).ToList())); // Map PublisherNames
+            CreateMap<Book, GetBookDTO>()
 
-            // Add other mappings as needed
+                .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => src.Genre.ToString())) // Assuming genre is an enum
+                .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.AuthorId))
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name))
+                .ForMember(dest => dest.Publishers, opt => opt.MapFrom(src => src.Publishers.Select(bp => bp.Publisher)))
+                .ReverseMap();
+
+            CreateMap<Book, GetPublisherBookDTO>()
+               .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => src.Genre.ToString())) // Assuming BookGenreEnum needs to be mapped to string
+               .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name)).ReverseMap(); // Maps Author's Name to GetPublisherBookDTO
+
 
             #region Mapping for Author
 
@@ -27,7 +34,7 @@ namespace BookStoreManagement.Service.Helpers.AutoMapper
                 .ReverseMap();
 
             CreateMap<Author, GetAuthorDTO>()
-                .ForMember(dest => dest.Books, opt => opt.MapFrom(src => src.Books)); // Map books
+                .ForMember(dest => dest.Books, opt => opt.MapFrom(src => src.Books)).ReverseMap(); // Map books
 
             #endregion Mapping for Author
 
@@ -49,6 +56,8 @@ namespace BookStoreManagement.Service.Helpers.AutoMapper
                 .ForMember(dto => dto.AuthorId, opt => opt.MapFrom(bookPublisher => bookPublisher.Book.AuthorId))
                 .ForMember(dto => dto.AuthorName, opt => opt.MapFrom(bookPublisher => bookPublisher.Book.Author.Name));
 
+
+
             #endregion Mapping for Publisher
 
             // Mapping for BookPublisher
@@ -57,6 +66,10 @@ namespace BookStoreManagement.Service.Helpers.AutoMapper
 
             CreateMap<Publisher, AddBookPublisherDTO>()
                 .ReverseMap();
+
+            CreateMap<Purchase, AddPurchaseDTO>()
+                .ReverseMap();
+
         }
     }
 }
