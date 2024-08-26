@@ -6,7 +6,7 @@
         public string Name { get; set; }
 
         // This will hold a list of books associated with the author
-        public List<GetBookDTO> Books { get; set; }
+        public List<GetPublisherBookDTO> Books { get; set; }
     }
 
 }

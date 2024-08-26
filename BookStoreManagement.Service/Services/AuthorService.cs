@@ -28,13 +28,12 @@ namespace BookStoreManagement.Service.Services
             return _mapper.Map<IEnumerable<GetAuthorListDTO>>(authors);
         }
 
-
         public async Task<GetAuthorDTO> GetAuthorByIdAsync(int id)
         {
             // Fetch the author by id including related books
             var author = await _authorRepository.GetAll<Author>()
-                                                .Include(a => a.Books) // Include the related books
-                                                .FirstOrDefaultAsync(a => a.Id == id);
+                .Include(a => a.Books) // Include the related books
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (author == null)
             {
@@ -44,7 +43,6 @@ namespace BookStoreManagement.Service.Services
             // Map to GetAuthorDTO which includes the list of books
             return _mapper.Map<GetAuthorDTO>(author);
         }
-
 
         public async Task<GetAuthorListDTO> AddAuthorAsync(AddAuthorDTO authorDto)
         {
@@ -72,6 +70,5 @@ namespace BookStoreManagement.Service.Services
             await _authorRepository.SaveChangesAsync();
             return true;
         }
-
     }
 }

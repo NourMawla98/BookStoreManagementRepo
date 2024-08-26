@@ -38,7 +38,7 @@ namespace BookStoreManagement.API.Controllers
 
         // PUT: api/Book/5
         [HttpPut]
-        public async Task<IActionResult> UpdateBook([FromBody] GetBookDTO bookDto)
+        public async Task<IActionResult> UpdateBook([FromBody] GetPublisherBookDTO bookDto)
         {
             return Ok(await _bookService.UpdateBookAsync(bookDto));
         }

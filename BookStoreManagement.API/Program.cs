@@ -1,4 +1,5 @@
 using BookStoreManagement.Domain.Context;
+using BookStoreManagement.Service.Helpers.AutoMapper;
 using BookStoreManagement.Service.Interfaces;
 using BookStoreManagement.Service.Repository;
 using BookStoreManagement.Service.Services;
@@ -28,12 +29,7 @@ builder.Services.AddScoped<IBookService, BookService>();
 // Registering PublisherService
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 
-// Registering BookPublisherService
-builder.Services.AddScoped<IBookPublisherService, BookPublisherService>();
-
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
-
-
 
 //Mapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));

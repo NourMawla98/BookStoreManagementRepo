@@ -19,13 +19,13 @@ namespace BookStoreManagement.Service.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<GetBookDTO>> GetBooksAsync()
+        public async Task<IEnumerable<GetPublisherBookDTO>> GetBooksAsync()
         {
             var books = await _bookRepository.GetAll<Book>().ToListAsync();
-            return _mapper.Map<IEnumerable<GetBookDTO>>(books);
+            return _mapper.Map<IEnumerable<GetPublisherBookDTO>>(books);
         }
 
-        public async Task<GetBookDTO> GetBookByIdAsync(int id)
+        public async Task<GetPublisherBookDTO> GetBookByIdAsync(int id)
         {
             // Fetch the book including related author and publishers
             var book = await _bookRepository.GetAll<Book>()
@@ -40,7 +40,7 @@ namespace BookStoreManagement.Service.Services
             }
 
             // Map the book entity to GetBookDTO
-            var bookDto = _mapper.Map<GetBookDTO>(book);
+            var bookDto = _mapper.Map<GetPublisherBookDTO>(book);
 
             // Set the AuthorName and PublisherNames in the DTO
             bookDto.AuthorName = book.Author?.Name; // Assuming the Author has a Name property
@@ -51,7 +51,7 @@ namespace BookStoreManagement.Service.Services
             return bookDto;
         }
 
-        public async Task<GetBookDTO> AddBookAsync(AddBookDTO bookDto)
+        public async Task<GetPublisherBookDTO> AddBookAsync(AddBookDTO bookDto)
         {
             // Map DTO to Book entity
             var newBook = _mapper.Map<Book>(bookDto);
@@ -80,11 +80,10 @@ namespace BookStoreManagement.Service.Services
             }
 
             // Map the result to GetBookDTO
-            return _mapper.Map<GetBookDTO>(newBook);
+            return _mapper.Map<GetPublisherBookDTO>(newBook);
         }
 
-
-        public async Task<bool> UpdateBookAsync(GetBookDTO bookDto)
+        public async Task<bool> UpdateBookAsync(GetPublisherBookDTO bookDto)
         {
             var book = await _bookRepository.GetAll<Book>().FirstOrDefaultAsync(b => b.Id == bookDto.Id) ??
                 throw new BadHttpRequestException("Book not found", (int)HttpStatusCode.NotFound);

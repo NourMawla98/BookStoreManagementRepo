@@ -2,7 +2,7 @@
 
 namespace BookStoreManagement.Domain.DTOs
 {
-    public class GetBookDTO
+    public class GetPublisherBookDTO
     {
         // The unique identifier of the book
         public int Id { get; set; }
@@ -11,15 +11,11 @@ namespace BookStoreManagement.Domain.DTOs
         public string Title { get; set; } = String.Empty;
         public string Genre { get; set; }
 
-
         // The ID of the author associated with the book
         public int AuthorId { get; set; }
 
         // The name of the author associated with the book
         public string AuthorName { get; set; } = String.Empty;
-
-        // List of publishers associated with the book
-        public List<string> PublisherNames { get; set; } = new List<string>();
     }
 }
 

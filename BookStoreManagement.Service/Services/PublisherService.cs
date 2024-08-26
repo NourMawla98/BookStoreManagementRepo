@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BookStoreManagement.Domain.DTOs;
 using BookStoreManagement.Domain.Models;
 using BookStoreManagement.Service.Interfaces;
@@ -18,6 +19,7 @@ namespace BookStoreManagement.Service.Services
             _publisherRepository = publisherRepository;
             _mapper = mapper;
         }
+
         public async Task<GetPublisherListDTO> AddPublisherAsync(AddPublisherDTO publisherDto)
         {
             // Map AddPublisherDTO to Publisher entity
@@ -37,27 +39,21 @@ namespace BookStoreManagement.Service.Services
 
         public async Task<IEnumerable<GetPublisherListDTO>> GetPublishersAsync()
         {
-            var publishers = await _publisherRepository.GetAll<Publisher>().ToListAsync();
-            return _mapper.Map<IEnumerable<GetPublisherListDTO>>(publishers);
+            return await _publisherRepository.GetAll<Publisher>()
+                .ProjectTo<GetPublisherListDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
-
-
-
 
         public async Task<GetPublisherDTO> GetPublisherByIdAsync(int id)
         {
-            var publisher = await _publisherRepository.GetAll<Publisher>()
-                                                      .Include(p => p.PublishedBooks)
-                                                      .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (publisher == null)
-            {
+            var publisherDTO = await _publisherRepository.GetAll<Publisher>()
+                .Where(p => p.Id == id)
+                .ProjectTo<GetPublisherDTO>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync() ??
                 throw new BadHttpRequestException("Publisher not found", (int)HttpStatusCode.NotFound);
-            }
 
-            return _mapper.Map<GetPublisherDTO>(publisher);
+            return publisherDTO;
         }
-
 
         public async Task<bool> UpdatePublisherAsync(GetPublisherListDTO publisherDto)
         {
@@ -68,7 +64,7 @@ namespace BookStoreManagement.Service.Services
             await _publisherRepository.SaveChangesAsync();
             return true;
         }
-        
+
         public async Task<bool> DeletePublisherAsync(int id)
         {
             var publisher = await _publisherRepository.GetAll<Publisher>().FirstOrDefaultAsync(p => p.Id == id) ??
@@ -78,6 +74,5 @@ namespace BookStoreManagement.Service.Services
             await _publisherRepository.SaveChangesAsync();
             return true;
         }
-
     }
 }
