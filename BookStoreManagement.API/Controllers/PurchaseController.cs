@@ -18,32 +18,74 @@ namespace BookStoreManagement.API.Controllers
             _purchaseService = purchaseService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPurchases()
+        // POST: api/Purchase
+        [HttpPost]
+        public async Task<IActionResult> AddPurchase([FromBody] AddPurchaseDTO addPurchaseDTO)
         {
-            var purchases = await _purchaseService.GetPurchasesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var purchase = await _purchaseService.AddPurchaseAsync(addPurchaseDTO);
+            if (purchase == null)
+            {
+                return BadRequest("Purchase could not be created.");
+            }
+
+            return CreatedAtAction(nameof(GetPurchaseById), new { id = purchase.PurchaseId }, purchase);
+        }
+
+        // GET: api/Purchase/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPurchaseById(Guid id)
+        {
+            var purchase = await _purchaseService.GetPurchaseByIdAsync(id);
+            if (purchase == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(purchase);
+        }
+
+        // GET: api/Purchase
+        [HttpGet]
+        public async Task<IActionResult> GetAllPurchases()
+        {
+            var purchases = await _purchaseService.GetAllPurchasesAsync();
             return Ok(purchases);
         }
 
-        [HttpGet("{purchaseId}")]
-        public async Task<IActionResult> GetPurchase(Guid purchaseId)
+        // PUT: api/Purchase/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePurchase(Guid id, [FromBody] AddPurchaseDTO updatePurchaseDTO)
         {
-            var purchase = await _purchaseService.GetPurchaseByIdAsync(purchaseId);
-            return purchase != null ? Ok(purchase) : NotFound();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var updatedPurchase = await _purchaseService.UpdatePurchaseAsync(id, updatePurchaseDTO);
+            if (updatedPurchase == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedPurchase); // Return the updated purchase details
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddPurchase([FromBody] AddPurchaseDTO purchaseDto)
+        // DELETE: api/Purchase/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePurchase(Guid id)
         {
-            var newPurchase = await _purchaseService.AddPurchaseAsync(purchaseDto);
-            return CreatedAtAction(nameof(GetPurchase), new { purchaseId = newPurchase.PurchaseId }, newPurchase);
-        }
+            var isDeleted = await _purchaseService.DeletePurchaseAsync(id);
+            if (!isDeleted)
+            {
+                return NotFound();
+            }
 
-        [HttpDelete("{purchaseId}")]
-        public async Task<IActionResult> DeletePurchase(Guid purchaseId)
-        {
-            var result = await _purchaseService.DeletePurchaseAsync(purchaseId);
-            return result ? NoContent() : NotFound();
+            return NoContent(); // 204 status
         }
     }
 }

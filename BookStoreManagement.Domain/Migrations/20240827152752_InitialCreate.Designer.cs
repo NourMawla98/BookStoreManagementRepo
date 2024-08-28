@@ -4,6 +4,7 @@ using BookStoreManagement.Domain.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreManagement.Domain.Migrations
 {
     [DbContext(typeof(BookStoreDBContext))]
-    partial class BookStoreDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240827152752_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,11 +141,14 @@ namespace BookStoreManagement.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<int?>("BookPublisherId")
+                    b.Property<int>("BookPublisherId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
@@ -151,32 +157,7 @@ namespace BookStoreManagement.Domain.Migrations
 
                     b.HasIndex("BookPublisherId");
 
-                    b.ToTable("Purchases");
-                });
-
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.PurchaseDetail", b =>
-                {
-                    b.Property<Guid>("PurchaseDetailId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("PurchaseId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("PurchaseDetailId");
-
-                    b.HasIndex("PurchaseId");
-
-                    b.ToTable("PurchaseDetails");
+                    b.ToTable("Purchase");
                 });
 
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Book", b =>
@@ -211,20 +192,13 @@ namespace BookStoreManagement.Domain.Migrations
 
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Purchase", b =>
                 {
-                    b.HasOne("BookStoreManagement.Domain.Models.BookPublisher", null)
+                    b.HasOne("BookStoreManagement.Domain.Models.BookPublisher", "BookPublisher")
                         .WithMany("Purchases")
-                        .HasForeignKey("BookPublisherId");
-                });
-
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.PurchaseDetail", b =>
-                {
-                    b.HasOne("BookStoreManagement.Domain.Models.Purchase", "Purchase")
-                        .WithMany("PurchaseDetails")
-                        .HasForeignKey("PurchaseId")
+                        .HasForeignKey("BookPublisherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Purchase");
+                    b.Navigation("BookPublisher");
                 });
 
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Author", b =>
@@ -245,11 +219,6 @@ namespace BookStoreManagement.Domain.Migrations
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Publisher", b =>
                 {
                     b.Navigation("PublishedBooks");
-                });
-
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.Purchase", b =>
-                {
-                    b.Navigation("PurchaseDetails");
                 });
 #pragma warning restore 612, 618
         }

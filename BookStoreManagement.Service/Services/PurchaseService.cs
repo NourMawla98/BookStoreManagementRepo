@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using BookStoreManagement.Domain.Context;
 using BookStoreManagement.Domain.DTOs;
 using BookStoreManagement.Domain.Models;
 using BookStoreManagement.Service.Interfaces;
@@ -14,56 +15,74 @@ namespace BookStoreManagement.Service.Services
 {
     public class PurchaseService : IPurchaseService
     {
-        private readonly IBookStoreRepository _repository;
         private readonly IMapper _mapper;
+        private readonly BookStoreDBContext _context;
 
-        public PurchaseService(IBookStoreRepository repository, IMapper mapper)
+        public PurchaseService(IMapper mapper, BookStoreDBContext context)
         {
-            _repository = repository;
             _mapper = mapper;
+            _context = context;
         }
 
-        public async Task<IEnumerable<GetPurchaseDTO>> GetPurchasesAsync()
+        public async Task<Purchase> AddPurchaseAsync(AddPurchaseDTO addPurchaseDTO)
         {
-            // Use ProjectTo to project Purchase entities to GetPurchaseDTO
-            return await _repository.GetAll<Purchase>()
-                .ProjectTo<GetPurchaseDTO>(_mapper.ConfigurationProvider)
+            var purchase = _mapper.Map<Purchase>(addPurchaseDTO);
+            // Calculate TotalPrice based on PurchaseDetails
+            purchase.TotalPrice = purchase.PurchaseDetails.Sum(pd => pd.Price * pd.Quantity);
+
+            _context.Purchases.Add(purchase);
+            await _context.SaveChangesAsync();
+            return purchase;
+        }
+
+        public async Task<GetPurchaseDTO> GetPurchaseByIdAsync(Guid id)
+        {
+            var purchase = await _context.Purchases
+                .Include(p => p.PurchaseDetails)
+                .SingleOrDefaultAsync(p => p.PurchaseId == id);
+
+            return purchase != null ? _mapper.Map<GetPurchaseDTO>(purchase) : null;
+        }
+
+        public async Task<IEnumerable<GetPurchaseDTO>> GetAllPurchasesAsync()
+        {
+            var purchases = await _context.Purchases
+                .Include(p => p.PurchaseDetails)
                 .ToListAsync();
+
+            return _mapper.Map<IEnumerable<GetPurchaseDTO>>(purchases);
         }
 
-        public async Task<GetPurchaseDTO> GetPurchaseByIdAsync(Guid purchaseId)
+        public async Task<GetPurchaseDTO> UpdatePurchaseAsync(Guid id, AddPurchaseDTO updatePurchaseDTO)
         {
-            // Use ProjectTo to project the purchase entity to GetPurchaseDTO
-            var purchaseDto = await _repository.GetAll<Purchase>()
-                .Where(p => p.PurchaseId == purchaseId)
-                .ProjectTo<GetPurchaseDTO>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ??
-                throw new BadHttpRequestException("Purchase not found", (int)HttpStatusCode.NotFound);
+            var purchase = await _context.Purchases
+                .Include(p => p.PurchaseDetails)
+                .SingleOrDefaultAsync(p => p.PurchaseId == id);
 
-            return purchaseDto;
+            if (purchase == null) return null;
+
+            // Update purchase details
+            _mapper.Map(updatePurchaseDTO, purchase);
+
+            // Recalculate TotalPrice
+            purchase.TotalPrice = purchase.PurchaseDetails.Sum(pd => pd.Price * pd.Quantity);
+
+            _context.Purchases.Update(purchase);
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<GetPurchaseDTO>(purchase);
         }
 
-        public async Task<GetPurchaseDTO> AddPurchaseAsync(AddPurchaseDTO purchaseDto)
+        public async Task<bool> DeletePurchaseAsync(Guid id)
         {
-            var purchase = _mapper.Map<Purchase>(purchaseDto);
-            _repository.Add(purchase);
-            await _repository.SaveChangesAsync();
+            var purchase = await _context.Purchases
+                .Include(p => p.PurchaseDetails)
+                .SingleOrDefaultAsync(p => p.PurchaseId == id);
 
-            // Use ProjectTo to map the newly added purchase to GetPurchaseDTO
-            return await _repository.GetAll<Purchase>()
-                .Where(p => p.PurchaseId == purchase.PurchaseId)
-                .ProjectTo<GetPurchaseDTO>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
-        }
+            if (purchase == null) return false;
 
-        public async Task<bool> DeletePurchaseAsync(Guid purchaseId)
-        {
-            var purchase = await _repository.GetAll<Purchase>()
-                .FirstOrDefaultAsync(p => p.PurchaseId == purchaseId) ??
-                throw new BadHttpRequestException("Purchase not found", (int)HttpStatusCode.NotFound);
-
-            _repository.Remove(purchase);
-            await _repository.SaveChangesAsync();
+            _context.Purchases.Remove(purchase);
+            await _context.SaveChangesAsync();
             return true;
         }
     }

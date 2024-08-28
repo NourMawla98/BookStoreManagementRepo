@@ -4,40 +4,56 @@ using BookStoreManagement.Service.Interfaces;
 using BookStoreManagement.Service.Repository;
 using BookStoreManagement.Service.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+        options.JsonSerializerOptions.MaxDepth = 64; // Optional: Increase if needed
+    });
 builder.Services.AddSwaggerGen();
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddDbContext<BookStoreDBContext>(options =>
 {
-    string defaultConnectionString = builder.Configuration.GetConnectionString("BOOK_STORE_CONNECTION_STRING") ?? "";
+    string defaultConnectionString = "Server=127.0.0.1; Port=3306; Database=book_store_database; User=root; Password=1234; Connect Timeout=30;";
     options.UseMySql(defaultConnectionString, ServerVersion.AutoDetect(defaultConnectionString));
 });
 
 builder.Services.AddScoped<IBookStoreRepository, BookStoreRepository>();
 
-// upcoming below: dependency injections lal services li 3mlnenun implement
-// Registering AuthorService
+// Registering services
 builder.Services.AddScoped<IAuthorService, AuthorService>();
-
-// Registering BookService
 builder.Services.AddScoped<IBookService, BookService>();
-
-// Registering PublisherService
 builder.Services.AddScoped<IPublisherService, PublisherService>();
-
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 
-//Mapper
+// Add AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 var app = builder.Build();
 
+// Use Swagger for API documentation
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Use CORS
+app.UseCors();
 
 app.UseDeveloperExceptionPage();
 

@@ -15,7 +15,8 @@ namespace BookStoreManagement.Domain.Context
         public virtual DbSet<Publisher> Publisher { get; set; }
         public virtual DbSet<Book> Book { get; set; }
         public virtual DbSet<BookPublisher> BookPublisher { get; set; }
-        public virtual DbSet<Purchase> Purchase { get; set; } // Add Purchase DbSet
+        public DbSet<Purchase> Purchases { get; set; }
+        public DbSet<PurchaseDetail> PurchaseDetails { get; set; }
 
         #endregion DBSets
 
@@ -41,23 +42,54 @@ namespace BookStoreManagement.Domain.Context
                 //HasOne and WithMany byaamlu sawa one-to-one rlt between Book and Publisher. yaane each single publisher can have many entries(Rows) in BookPublisher table (ykun eendu many published books).
 
                 entity.HasOne(bp => bp.Publisher) //bookpublisher has one publisher
-                      .WithMany( p => p.PublishedBooks) //publsiher has many publsihedBooks
+                      .WithMany(p => p.PublishedBooks) //publsiher has many publsihedBooks
                       .HasForeignKey(bp => bp.PublisherId); //bookpublisher has a foreign key
             });
 
-            // Configure the Purchase entity
             modelBuilder.Entity<Purchase>(entity =>
             {
+                // Define the primary key
                 entity.HasKey(p => p.PurchaseId);
 
+                // Configure TotalPrice with appropriate column type
                 entity.Property(p => p.TotalPrice)
                       .IsRequired()
                       .HasColumnType("decimal(18,2)");
 
-                entity.HasOne(p => p.BookPublisher)
-                      .WithMany(bp => bp.Purchases)
-                      .HasForeignKey(p => p.BookPublisherId);
+                // Configure PurchaseDate
+                entity.Property(p => p.PurchaseDate)
+                      .IsRequired();
+
+                // Configure one-to-many relationship with PurchaseDetail
+                entity.HasMany(p => p.PurchaseDetails)
+                      .WithOne(pd => pd.Purchase)
+                      .HasForeignKey(pd => pd.PurchaseId)
+                      .OnDelete(DeleteBehavior.Cascade); // Optional: Cascade delete
             });
+
+            modelBuilder.Entity<PurchaseDetail>(entity =>
+            {
+                // Define the primary key
+                entity.HasKey(pd => pd.PurchaseDetailId);
+
+                // Configure BookId, Quantity, and Price
+                entity.Property(pd => pd.BookId)
+                      .IsRequired();
+
+                entity.Property(pd => pd.Quantity)
+                      .IsRequired();
+
+                entity.Property(pd => pd.Price)
+                      .IsRequired()
+                      .HasColumnType("decimal(18,2)");
+
+                // Configure foreign key relationship with Purchase
+                entity.HasOne(pd => pd.Purchase)
+                      .WithMany(p => p.PurchaseDetails)
+                      .HasForeignKey(pd => pd.PurchaseId)
+                      .OnDelete(DeleteBehavior.Cascade); // Optional: Cascade delete
+            });
+
 
             base.OnModelCreating(modelBuilder);
         }

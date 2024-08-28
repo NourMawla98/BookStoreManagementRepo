@@ -3,13 +3,14 @@
     using System;
 
 
+
     public class GetPurchaseDTO
     {
         public Guid PurchaseId { get; set; }
-        public int BookId { get; set; }
-        public int CustomerId { get; set; }
         public DateTime PurchaseDate { get; set; }
-        public decimal Price { get; set; }
+        public decimal TotalPrice { get; set; }
+        public List<PurchaseDetailDTO> PurchaseDetails { get; set; } = new List<PurchaseDetailDTO>();
     }
+
 
 }
