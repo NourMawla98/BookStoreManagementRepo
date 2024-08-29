@@ -5,13 +5,20 @@ namespace BookStoreManagement.Domain.DTOs
 {
     public class AddPurchaseDTO
     {
-        [Required]
-        public DateTime PurchaseDate { get; set; }
+        [Required, Range(1, int.MaxValue, ErrorMessage = "BookId must be a positive integer.")]
+        public int BookId { get; set; }
 
-        [Required]
-        public List<PurchaseDetailDTO> PurchaseDetails { get; set; } = new List<PurchaseDetailDTO>();
+        [Required, Range(0.01, double.MaxValue, ErrorMessage = "Book price must be greater than zero.")]
+        public double Bookprice { get; set; }
+
+        [Required, Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
+        public int Quantity { get; set; }
+
+        [Required, DataType(DataType.Date)]
+        public DateTime PurchaseDate { get; set; }
     }
 }
+
 
 
 

@@ -2,8 +2,7 @@
 using BookStoreManagement.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace BookStoreManagement.API.Controllers
 {
@@ -20,72 +19,38 @@ namespace BookStoreManagement.API.Controllers
 
         // POST: api/Purchase
         [HttpPost]
-        public async Task<IActionResult> AddPurchase([FromBody] AddPurchaseDTO addPurchaseDTO)
+        public async Task<IActionResult> PurchaseABook([FromBody] AddPurchaseDTO addPurchaseDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var purchase = await _purchaseService.AddPurchaseAsync(addPurchaseDTO);
-            if (purchase == null)
+            var result = await _purchaseService.PurchaseABook(addPurchaseDTO);
+            if (!result)
             {
-                return BadRequest("Purchase could not be created.");
+                return BadRequest("Purchase could not be processed.");
             }
 
-            return CreatedAtAction(nameof(GetPurchaseById), new { id = purchase.PurchaseId }, purchase);
+            return Ok("Purchase successfully processed.");
         }
 
-        // GET: api/Purchase/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPurchaseById(Guid id)
+        // GET: api/Purchase/monthly-sales
+        [HttpGet("monthly-sales")]
+        public async Task<IActionResult> GetTotalSalesPerMonth([FromQuery] DateTime date)
         {
-            var purchase = await _purchaseService.GetPurchaseByIdAsync(id);
-            if (purchase == null)
+            if (date == default)
             {
-                return NotFound();
+                return BadRequest("Invalid date.");
             }
 
-            return Ok(purchase);
-        }
+            var purchases = await _purchaseService.TotalSalesPerMonth(date);
+            if (purchases == null || purchases.Count == 0)
+            {
+                return NotFound("No purchases found for the specified month.");
+            }
 
-        // GET: api/Purchase
-        [HttpGet]
-        public async Task<IActionResult> GetAllPurchases()
-        {
-            var purchases = await _purchaseService.GetAllPurchasesAsync();
             return Ok(purchases);
-        }
-
-        // PUT: api/Purchase/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePurchase(Guid id, [FromBody] AddPurchaseDTO updatePurchaseDTO)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var updatedPurchase = await _purchaseService.UpdatePurchaseAsync(id, updatePurchaseDTO);
-            if (updatedPurchase == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(updatedPurchase); // Return the updated purchase details
-        }
-
-        // DELETE: api/Purchase/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePurchase(Guid id)
-        {
-            var isDeleted = await _purchaseService.DeletePurchaseAsync(id);
-            if (!isDeleted)
-            {
-                return NotFound();
-            }
-
-            return NoContent(); // 204 status
         }
     }
 }

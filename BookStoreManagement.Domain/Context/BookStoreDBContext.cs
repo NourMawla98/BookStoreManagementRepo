@@ -15,8 +15,8 @@ namespace BookStoreManagement.Domain.Context
         public virtual DbSet<Publisher> Publisher { get; set; }
         public virtual DbSet<Book> Book { get; set; }
         public virtual DbSet<BookPublisher> BookPublisher { get; set; }
-        public DbSet<Purchase> Purchases { get; set; }
-        public DbSet<PurchaseDetail> PurchaseDetails { get; set; }
+        public DbSet<Purchase> Purchase { get; set; }
+
 
         #endregion DBSets
 
@@ -51,43 +51,25 @@ namespace BookStoreManagement.Domain.Context
                 // Define the primary key
                 entity.HasKey(p => p.PurchaseId);
 
-                // Configure TotalPrice with appropriate column type
-                entity.Property(p => p.TotalPrice)
-                      .IsRequired()
-                      .HasColumnType("decimal(18,2)");
-
-                // Configure PurchaseDate
+                // Define properties and their configurations
                 entity.Property(p => p.PurchaseDate)
-                      .IsRequired();
+                      .IsRequired() // Ensure PurchaseDate is required
+                      .HasColumnType("datetime(6)"); // Define column type
 
-                // Configure one-to-many relationship with PurchaseDetail
-                entity.HasMany(p => p.PurchaseDetails)
-                      .WithOne(pd => pd.Purchase)
-                      .HasForeignKey(pd => pd.PurchaseId)
-                      .OnDelete(DeleteBehavior.Cascade); // Optional: Cascade delete
-            });
+                entity.Property(p => p.BookId)
+                      .IsRequired(); // Ensure BookId is required
 
-            modelBuilder.Entity<PurchaseDetail>(entity =>
-            {
-                // Define the primary key
-                entity.HasKey(pd => pd.PurchaseDetailId);
+                entity.Property(p => p.Bookprice)
+                      .IsRequired() // Ensure Bookprice is required
+                      .HasColumnType("double"); // Define column type for double
 
-                // Configure BookId, Quantity, and Price
-                entity.Property(pd => pd.BookId)
-                      .IsRequired();
+                entity.Property(p => p.Quantity)
+                      .IsRequired() // Ensure Quantity is required
+                      .HasColumnType("int"); // Define column type for int
 
-                entity.Property(pd => pd.Quantity)
-                      .IsRequired();
 
-                entity.Property(pd => pd.Price)
-                      .IsRequired()
-                      .HasColumnType("decimal(18,2)");
 
-                // Configure foreign key relationship with Purchase
-                entity.HasOne(pd => pd.Purchase)
-                      .WithMany(p => p.PurchaseDetails)
-                      .HasForeignKey(pd => pd.PurchaseId)
-                      .OnDelete(DeleteBehavior.Cascade); // Optional: Cascade delete
+                // Configure other relationships if needed
             });
 
 

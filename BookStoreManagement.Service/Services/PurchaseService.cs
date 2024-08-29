@@ -1,89 +1,49 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using BookStoreManagement.Domain.Context;
 using BookStoreManagement.Domain.DTOs;
 using BookStoreManagement.Domain.Models;
 using BookStoreManagement.Service.Interfaces;
 using BookStoreManagement.Service.Repository;
+
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
+
 
 namespace BookStoreManagement.Service.Services
 {
     public class PurchaseService : IPurchaseService
     {
+        private readonly IBookStoreRepository _purchaseRepository;
         private readonly IMapper _mapper;
-        private readonly BookStoreDBContext _context;
 
-        public PurchaseService(IMapper mapper, BookStoreDBContext context)
+        public PurchaseService(IBookStoreRepository purchaseRepository, IMapper mapper)
         {
+            _purchaseRepository = purchaseRepository;
             _mapper = mapper;
-            _context = context;
         }
 
-        public async Task<Purchase> AddPurchaseAsync(AddPurchaseDTO addPurchaseDTO)
+        public async Task<bool> PurchaseABook(AddPurchaseDTO purchaseDTO)
         {
-            var purchase = _mapper.Map<Purchase>(addPurchaseDTO);
-            // Calculate TotalPrice based on PurchaseDetails
-            purchase.TotalPrice = purchase.PurchaseDetails.Sum(pd => pd.Price * pd.Quantity);
+            // Map AddPurchaseDTO to Purchase entity
+            var newPurchase = _mapper.Map<Purchase>(purchaseDTO);
 
-            _context.Purchases.Add(purchase);
-            await _context.SaveChangesAsync();
-            return purchase;
-        }
+            // Add the Purchase to the repository
+            _purchaseRepository.Add(newPurchase);
 
-        public async Task<GetPurchaseDTO> GetPurchaseByIdAsync(Guid id)
-        {
-            var purchase = await _context.Purchases
-                .Include(p => p.PurchaseDetails)
-                .SingleOrDefaultAsync(p => p.PurchaseId == id);
+            // Save changes to the database
+            await _purchaseRepository.SaveChangesAsync();
 
-            return purchase != null ? _mapper.Map<GetPurchaseDTO>(purchase) : null;
-        }
-
-        public async Task<IEnumerable<GetPurchaseDTO>> GetAllPurchasesAsync()
-        {
-            var purchases = await _context.Purchases
-                .Include(p => p.PurchaseDetails)
-                .ToListAsync();
-
-            return _mapper.Map<IEnumerable<GetPurchaseDTO>>(purchases);
-        }
-
-        public async Task<GetPurchaseDTO> UpdatePurchaseAsync(Guid id, AddPurchaseDTO updatePurchaseDTO)
-        {
-            var purchase = await _context.Purchases
-                .Include(p => p.PurchaseDetails)
-                .SingleOrDefaultAsync(p => p.PurchaseId == id);
-
-            if (purchase == null) return null;
-
-            // Update purchase details
-            _mapper.Map(updatePurchaseDTO, purchase);
-
-            // Recalculate TotalPrice
-            purchase.TotalPrice = purchase.PurchaseDetails.Sum(pd => pd.Price * pd.Quantity);
-
-            _context.Purchases.Update(purchase);
-            await _context.SaveChangesAsync();
-
-            return _mapper.Map<GetPurchaseDTO>(purchase);
-        }
-
-        public async Task<bool> DeletePurchaseAsync(Guid id)
-        {
-            var purchase = await _context.Purchases
-                .Include(p => p.PurchaseDetails)
-                .SingleOrDefaultAsync(p => p.PurchaseId == id);
-
-            if (purchase == null) return false;
-
-            _context.Purchases.Remove(purchase);
-            await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<GetPurchaseDTO>> TotalSalesPerMonth(DateTime date)
+        {
+            // Retrieve and map the purchases for the specified month
+            return await _purchaseRepository.GetAll<Purchase>()
+                .Include(p => p.Book) // Include related Book entity if necessary
+                .Where(p => p.PurchaseDate.Year == date.Year && p.PurchaseDate.Month == date.Month)
+                .ProjectTo<GetPurchaseDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
     }
 }
