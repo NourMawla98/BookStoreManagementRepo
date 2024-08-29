@@ -1,10 +1,10 @@
+using BookStoreManagement.API.Extensions;
 using BookStoreManagement.Domain.Context;
 using BookStoreManagement.Service.Helpers.AutoMapper;
 using BookStoreManagement.Service.Interfaces;
 using BookStoreManagement.Service.Repository;
 using BookStoreManagement.Service.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<BookStoreDBContext>(options =>
 {
-    string defaultConnectionString = "Server=127.0.0.1; Port=3306; Database=book_store_database; User=root; Password=1234; Connect Timeout=30;";
+    string defaultConnectionString = builder.Configuration.GetConnectionString("BOOK_STORE_CONNECTION_STRING");
     options.UseMySql(defaultConnectionString, ServerVersion.AutoDetect(defaultConnectionString));
 });
 
@@ -62,5 +62,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MigrateDatabase<BookStoreDBContext>();
 
 app.Run();
