@@ -36,12 +36,12 @@ namespace BookStoreManagement.Service.Services
             return true;
         }
 
-        public async Task<List<GetPurchaseDTO>> TotalSalesPerMonth(DateTime date)
+        public async Task<List<GetPurchaseDTO>> TotalSalesPerMonth(int month)
         {
             // Retrieve and map the purchases for the specified month
             return await _purchaseRepository.GetAll<Purchase>()
                 .Include(p => p.Book) // Include related Book entity if necessary
-                .Where(p => p.PurchaseDate.Year == date.Year && p.PurchaseDate.Month == date.Month)
+                .Where(p => p.PurchaseDate.Month == month)
                 .ProjectTo<GetPurchaseDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }

@@ -10,6 +10,6 @@ namespace BookStoreManagement.Service.Interfaces
     {
         Task<bool> PurchaseABook(AddPurchaseDTO purchaseDTO);
 
-        Task<List<GetPurchaseDTO>> TotalSalesPerMonth(DateTime date);
+        Task<List<GetPurchaseDTO>> TotalSalesPerMonth(int month);
     }
 }

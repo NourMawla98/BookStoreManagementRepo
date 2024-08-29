@@ -37,14 +37,14 @@ namespace BookStoreManagement.API.Controllers
 
         // GET: api/Purchase/monthly-sales
         [HttpGet("monthly-sales")]
-        public async Task<IActionResult> GetTotalSalesPerMonth([FromQuery] DateTime date)
+        public async Task<IActionResult> GetTotalSalesPerMonth([FromQuery] int month)
         {
-            if (date == default)
+            if (month == default)
             {
                 return BadRequest("Invalid date.");
             }
 
-            var purchases = await _purchaseService.TotalSalesPerMonth(date);
+            var purchases = await _purchaseService.TotalSalesPerMonth(month);
             if (purchases == null || purchases.Count == 0)
             {
                 return NotFound("No purchases found for the specified month.");

@@ -12,11 +12,13 @@ namespace BookStoreManagement.Service.Services
     public class BookService : IBookService
     {
         private readonly IBookStoreRepository _bookRepository;
+        private readonly IBookStoreRepository _publisherRepository;
         private readonly IMapper _mapper;
 
-        public BookService(IBookStoreRepository bookRepository, IMapper mapper)
+        public BookService(IBookStoreRepository bookRepository, IBookStoreRepository publisherRepository, IMapper mapper)
         {
             _bookRepository = bookRepository;
+            _publisherRepository = publisherRepository;
             _mapper = mapper;
         }
 
@@ -30,11 +32,15 @@ namespace BookStoreManagement.Service.Services
 
         public async Task<GetBookDTO> GetBookByIdAsync(int id)
         {
-            return await _bookRepository.GetAll<Book>()
-                .Include(b => b.Publishers).ThenInclude(bp => bp.Publisher) // Ensure you still include the publishers
-                .ProjectTo<GetBookDTO>(_mapper.ConfigurationProvider) // Project directly to GetBookDTO
+            var book = await _bookRepository.GetAll<Book>()
+                .Include(b => b.Publishers)
+                    .ThenInclude(bp => bp.Publisher) // Ensure you still include the publishers
                 .FirstOrDefaultAsync(b => b.Id == id);
+
+            // Manually map to GetBookDTO if ProjectTo is causing issues
+            return _mapper.Map<GetBookDTO>(book);
         }
+
 
 
 
@@ -48,15 +54,28 @@ namespace BookStoreManagement.Service.Services
             await _bookRepository.SaveChangesAsync();
 
             // After saving the book, associate it with publishers
-            if (bookDto.PublisherIds != null && bookDto.PublisherIds.Any())
+            if (bookDto.Publishers != null && bookDto.Publishers.Any())
             {
-                foreach (var publisherId in bookDto.PublisherIds)
+                foreach (var publisherDto in bookDto.Publishers)
                 {
-                    // Create a new BookPublisher entry for each publisherId
+                    // Check if publisher exists by name and address
+                    var existingPublisher = await _publisherRepository.GetAll<Publisher>()
+                        .FirstOrDefaultAsync(p => p.Name == publisherDto.Name && p.Location == publisherDto.Address);
+
+                    // If the publisher doesn't exist, create it
+                    if (existingPublisher == null)
+                    {
+                        var newPublisher = _mapper.Map<Publisher>(publisherDto);
+                        _publisherRepository.Add(newPublisher);
+                        await _publisherRepository.SaveChangesAsync();
+                        existingPublisher = newPublisher;
+                    }
+
+                    // Create a new BookPublisher entry
                     var bookPublisher = new BookPublisher
                     {
                         BookId = newBook.Id,
-                        PublisherId = publisherId
+                        PublisherId = existingPublisher.Id
                     };
 
                     _bookRepository.Add(bookPublisher); // Adding to repo
@@ -72,6 +91,8 @@ namespace BookStoreManagement.Service.Services
                 .ProjectTo<GetPublisherBookDTO>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
         }
+
+
 
         public async Task<bool> UpdateBookAsync(GetPublisherBookDTO bookDto)
         {

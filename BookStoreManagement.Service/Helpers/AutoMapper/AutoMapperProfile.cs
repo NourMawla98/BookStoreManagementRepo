@@ -8,9 +8,21 @@ namespace BookStoreManagement.Service.Helpers.AutoMapper
     {
         public AutoMapperProfile()
         {
-            // Mapping for Book
             CreateMap<Book, AddBookDTO>()
-                .ReverseMap();
+           .ForMember(dest => dest.Publishers, opt =>
+               opt.MapFrom(src => src.Publishers.Select(bp => new AddPublisherDTO
+               {
+                   Name = bp.Publisher.Name,
+                   Address = bp.Publisher.Location
+               }).ToList())
+           ).ReverseMap();
+
+            // Mapping for BookPublisher to AddPublisherDTO
+            CreateMap<BookPublisher, AddPublisherDTO>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Publisher.Name))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Publisher.Location)).ReverseMap();
+            // Mapping for Book
+
 
             CreateMap<Book, GetBookDTO>()
 
@@ -19,11 +31,17 @@ namespace BookStoreManagement.Service.Helpers.AutoMapper
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name))
                 .ForMember(dest => dest.Publishers, opt => opt.MapFrom(src => src.Publishers.Select(bp => bp.Publisher)))
                 .ReverseMap();
+          
+
 
             CreateMap<Book, GetPublisherBookDTO>()
                .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => src.Genre.ToString())) // Assuming BookGenreEnum needs to be mapped to string
                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name)).ReverseMap(); // Maps Author's Name to GetPublisherBookDTO
 
+
+
+            // Mapping for AddPublisherDTO to Publisher, no need to map to BookPublisher directly
+            CreateMap<Publisher, AddPublisherDTO>().ReverseMap();
 
             #region Mapping for Author
 

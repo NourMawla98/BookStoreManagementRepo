@@ -1,4 +1,6 @@
-﻿namespace BookStoreManagement.Domain.DTOs
+﻿using BookStoreManagement.Domain.Enums;
+
+namespace BookStoreManagement.Domain.DTOs
 {
     public class GetBookDTO
     {
@@ -8,7 +10,7 @@
         public string Title { get; set; } = string.Empty;
 
         // The genre of the book
-        public string Genre { get; set; }
+        public BookGenreEnum Genre { get; set; }
 
         // Author details
         public int AuthorId { get; set; }
