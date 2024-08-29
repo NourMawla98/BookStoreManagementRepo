@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreManagement.Domain.Migrations
 {
     [DbContext(typeof(BookStoreDBContext))]
-    [Migration("20240829101636_UpdatePurchaseSchema")]
-    partial class UpdatePurchaseSchema
+    [Migration("20240829104524_Purchase_Mig")]
+    partial class Purchase_Mig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,7 +93,7 @@ namespace BookStoreManagement.Domain.Migrations
                         .HasColumnName("book_id");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("price");
 
                     b.Property<int>("PublisherId")
@@ -148,9 +148,6 @@ namespace BookStoreManagement.Domain.Migrations
                         .HasColumnType("int")
                         .HasColumnName("book_id");
 
-                    b.Property<int?>("BookPublisherId")
-                        .HasColumnType("int");
-
                     b.Property<double>("Bookprice")
                         .HasColumnType("double")
                         .HasColumnName("book_price");
@@ -166,8 +163,6 @@ namespace BookStoreManagement.Domain.Migrations
                     b.HasKey("PurchaseId");
 
                     b.HasIndex("BookId");
-
-                    b.HasIndex("BookPublisherId");
 
                     b.ToTable("purchase");
                 });
@@ -210,10 +205,6 @@ namespace BookStoreManagement.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BookStoreManagement.Domain.Models.BookPublisher", null)
-                        .WithMany("Purchases")
-                        .HasForeignKey("BookPublisherId");
-
                     b.Navigation("Book");
                 });
 
@@ -225,11 +216,6 @@ namespace BookStoreManagement.Domain.Migrations
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Book", b =>
                 {
                     b.Navigation("Publishers");
-                });
-
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.BookPublisher", b =>
-                {
-                    b.Navigation("Purchases");
                 });
 
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Publisher", b =>

@@ -57,8 +57,7 @@ namespace BookStoreManagement.Domain.Migrations
                     title = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     genre = table.Column<int>(type: "int", nullable: false),
-                    auther_id = table.Column<int>(type: "int", nullable: false),
-                    PublisherId = table.Column<int>(type: "int", nullable: true)
+                    auther_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,11 +68,6 @@ namespace BookStoreManagement.Domain.Migrations
                         principalTable: "author",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_book_publisher_PublisherId",
-                        column: x => x.PublisherId,
-                        principalTable: "publisher",
-                        principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -84,7 +78,8 @@ namespace BookStoreManagement.Domain.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     book_id = table.Column<int>(type: "int", nullable: false),
-                    publisher_id = table.Column<int>(type: "int", nullable: false)
+                    publisher_id = table.Column<int>(type: "int", nullable: false),
+                    price = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,11 +98,6 @@ namespace BookStoreManagement.Domain.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_book_PublisherId",
-                table: "book",
-                column: "PublisherId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_book_auther_id",
@@ -135,10 +125,10 @@ namespace BookStoreManagement.Domain.Migrations
                 name: "book");
 
             migrationBuilder.DropTable(
-                name: "author");
+                name: "publisher");
 
             migrationBuilder.DropTable(
-                name: "publisher");
+                name: "author");
         }
     }
 }

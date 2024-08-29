@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreManagement.Domain.Migrations
 {
     [DbContext(typeof(BookStoreDBContext))]
-    [Migration("20240827152752_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240829104342_Book_Author_Publisher_Mig")]
+    partial class Book_Author_Publisher_Mig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,7 +93,7 @@ namespace BookStoreManagement.Domain.Migrations
                         .HasColumnName("book_id");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("price");
 
                     b.Property<int>("PublisherId")
@@ -135,31 +135,6 @@ namespace BookStoreManagement.Domain.Migrations
                     b.ToTable("publisher");
                 });
 
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.Purchase", b =>
-                {
-                    b.Property<Guid>("PurchaseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<int>("BookPublisherId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("PurchaseId");
-
-                    b.HasIndex("BookPublisherId");
-
-                    b.ToTable("Purchase");
-                });
-
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Book", b =>
                 {
                     b.HasOne("BookStoreManagement.Domain.Models.Author", "Author")
@@ -190,17 +165,6 @@ namespace BookStoreManagement.Domain.Migrations
                     b.Navigation("Publisher");
                 });
 
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.Purchase", b =>
-                {
-                    b.HasOne("BookStoreManagement.Domain.Models.BookPublisher", "BookPublisher")
-                        .WithMany("Purchases")
-                        .HasForeignKey("BookPublisherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BookPublisher");
-                });
-
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Author", b =>
                 {
                     b.Navigation("Books");
@@ -209,11 +173,6 @@ namespace BookStoreManagement.Domain.Migrations
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Book", b =>
                 {
                     b.Navigation("Publishers");
-                });
-
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.BookPublisher", b =>
-                {
-                    b.Navigation("Purchases");
                 });
 
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Publisher", b =>

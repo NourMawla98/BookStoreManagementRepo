@@ -1,5 +1,4 @@
-﻿using BookStoreManagement.Domain.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookStoreManagement.Domain.Models
@@ -22,7 +21,7 @@ namespace BookStoreManagement.Domain.Models
         [ForeignKey(nameof(PublisherId))]
         public virtual Publisher Publisher { get; set; }
 
-        public virtual ICollection<Purchase> Purchases { get; set; }
+        //public virtual ICollection<Purchase> Purchases { get; set; }
 
         [Column("price"), Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
         public decimal Price { get; set; }
