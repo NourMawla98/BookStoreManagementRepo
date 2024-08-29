@@ -33,16 +33,15 @@ namespace BookStoreManagement.Service.Services
         public async Task<GetBookDTO> GetBookByIdAsync(int id)
         {
             var book = await _bookRepository.GetAll<Book>()
+                .Where(b => b.Id == id)
+                .Include(b => b.Author)
                 .Include(b => b.Publishers)
                     .ThenInclude(bp => bp.Publisher) // Ensure you still include the publishers
-                .FirstOrDefaultAsync(b => b.Id == id);
+                .FirstOrDefaultAsync();
 
             // Manually map to GetBookDTO if ProjectTo is causing issues
             return _mapper.Map<GetBookDTO>(book);
         }
-
-
-
 
         public async Task<GetPublisherBookDTO> AddBookAsync(AddBookDTO bookDto)
         {
@@ -53,53 +52,45 @@ namespace BookStoreManagement.Service.Services
             _bookRepository.Add(newBook);
             await _bookRepository.SaveChangesAsync();
 
-            // After saving the book, associate it with publishers
-            if (bookDto.Publishers != null && bookDto.Publishers.Any())
-            {
-                foreach (var publisherDto in bookDto.Publishers)
-                {
-                    // Check if publisher exists by name and address
-                    var existingPublisher = await _publisherRepository.GetAll<Publisher>()
-                        .FirstOrDefaultAsync(p => p.Name == publisherDto.Name && p.Location == publisherDto.Address);
-
-                    // If the publisher doesn't exist, create it
-                    if (existingPublisher == null)
-                    {
-                        var newPublisher = _mapper.Map<Publisher>(publisherDto);
-                        _publisherRepository.Add(newPublisher);
-                        await _publisherRepository.SaveChangesAsync();
-                        existingPublisher = newPublisher;
-                    }
-
-                    // Create a new BookPublisher entry
-                    var bookPublisher = new BookPublisher
-                    {
-                        BookId = newBook.Id,
-                        PublisherId = existingPublisher.Id
-                    };
-
-                    _bookRepository.Add(bookPublisher); // Adding to repo
-                }
-
-                // Save changes for the BookPublisher associations
-                await _bookRepository.SaveChangesAsync();
-            }
-
             // Use ProjectTo to return the newly added book as GetPublisherBookDTO
-            return await _bookRepository.GetAll<Book>()
-                .Where(b => b.Id == newBook.Id)
-                .ProjectTo<GetPublisherBookDTO>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
+            return _mapper.Map<GetPublisherBookDTO>(newBook);
         }
 
-
-
-        public async Task<bool> UpdateBookAsync(GetPublisherBookDTO bookDto)
+        public async Task<bool> UpdateBookAsync(EditBookDTO bookDto)
         {
-            var book = await _bookRepository.GetAll<Book>().FirstOrDefaultAsync(b => b.Id == bookDto.Id) ??
+            var book = await _bookRepository.GetAll<Book>()
+                .Where(b => b.Id == bookDto.Id)
+                .Include(b => b.Publishers)
+                .FirstOrDefaultAsync() ??
                 throw new BadHttpRequestException("Book not found", (int)HttpStatusCode.NotFound);
 
             _mapper.Map(bookDto, book);
+
+            if ((book.Publishers == null || book.Publishers.Count == 0) && (bookDto.Publishers != null && bookDto.Publishers.Count > 0))
+                book.Publishers = _mapper.Map<List<BookPublisher>>(bookDto.Publishers);
+            else
+            {
+                //Foreach to add missing publisher
+                foreach (var dto in bookDto.Publishers)
+                {
+                    var bp = book.Publishers.FirstOrDefault(p => p.PublisherId == dto.PublisherId);
+
+                    if (bp == null)
+                        book.Publishers.Add(_mapper.Map<BookPublisher>(dto));
+                    else
+                        bp.Price = dto.Price;
+                }
+
+                //foreach to delete unwanted publishers
+                foreach (var bp in book.Publishers)
+                {
+                    var dto = bookDto.Publishers.FirstOrDefault(dto => dto.PublisherId == bp.PublisherId);
+
+                    if (dto == null)
+                        book.Publishers.Remove(bp);
+                }
+            }
+
             await _bookRepository.SaveChangesAsync();
             return true;
         }

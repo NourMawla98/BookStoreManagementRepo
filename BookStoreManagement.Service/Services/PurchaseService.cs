@@ -6,8 +6,6 @@ using BookStoreManagement.Service.Interfaces;
 using BookStoreManagement.Service.Repository;
 
 using Microsoft.EntityFrameworkCore;
-using System;
-
 
 namespace BookStoreManagement.Service.Services
 {
@@ -24,8 +22,18 @@ namespace BookStoreManagement.Service.Services
 
         public async Task<bool> PurchaseABook(AddPurchaseDTO purchaseDTO)
         {
+            var book = await _purchaseRepository.GetAll<Book>().AsNoTracking()
+                .Where(b => b.Id == purchaseDTO.BookId)
+                .Include(b => b.Publishers.FirstOrDefault(p => p.PublisherId == purchaseDTO.PublisherId))
+                .FirstOrDefaultAsync();
+
             // Map AddPurchaseDTO to Purchase entity
-            var newPurchase = _mapper.Map<Purchase>(purchaseDTO);
+            var newPurchase = new Purchase
+            {
+                BookId = book.Id,
+                Bookprice = book.Publishers.FirstOrDefault().Price,
+                Quantity = purchaseDTO.Quantity
+            };
 
             // Add the Purchase to the repository
             _purchaseRepository.Add(newPurchase);

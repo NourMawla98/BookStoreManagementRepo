@@ -1,9 +1,7 @@
 ﻿using BookStoreManagement.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace BookStoreManagement.Domain.DTOs
 {
-
     public class AddBookDTO
     {
         // The title of the book (required)
@@ -15,9 +13,6 @@ namespace BookStoreManagement.Domain.DTOs
         public int AuthorId { get; set; }
 
         // Optionally, you can add publishers here, if needed
-        public List<AddPublisherDTO> Publishers { get; set; } = new List<AddPublisherDTO>();
-
+        public List<BookPuplisherDTO> Publishers { get; set; } = new List<BookPuplisherDTO>();
     }
-
-
 }
