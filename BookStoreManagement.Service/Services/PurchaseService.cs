@@ -22,17 +22,33 @@ namespace BookStoreManagement.Service.Services
 
         public async Task<bool> PurchaseABook(AddPurchaseDTO purchaseDTO)
         {
-            var book = await _purchaseRepository.GetAll<Book>().AsNoTracking()
+            var book = await _purchaseRepository.GetAll<Book>()
+                .AsNoTracking()
                 .Where(b => b.Id == purchaseDTO.BookId)
-                .Include(b => b.Publishers.FirstOrDefault(p => p.PublisherId == purchaseDTO.PublisherId))
+                .Include(b => b.Publishers) // Include all publishers
+                .ThenInclude(bp => bp.Publisher) // Include the publisher details
                 .FirstOrDefaultAsync();
+
+            if (book == null)
+            {
+                // Handle the case when the book is not found
+                throw new Exception($"Book with Id {purchaseDTO.BookId} not found.");
+            }
+
+            // Ensure that there is at least one publisher associated with the book
+            var publisher = book.Publishers.FirstOrDefault();
+            if (publisher == null)
+            {
+                throw new Exception($"No publisher found for the book with Id {purchaseDTO.BookId}.");
+            }
 
             // Map AddPurchaseDTO to Purchase entity
             var newPurchase = new Purchase
             {
                 BookId = book.Id,
-                Bookprice = book.Publishers.FirstOrDefault().Price,
-                Quantity = purchaseDTO.Quantity
+                Bookprice = publisher.Price,
+                Quantity = purchaseDTO.Quantity,
+                PurchaseDate = DateTime.Now // Set the current date and time
             };
 
             // Add the Purchase to the repository

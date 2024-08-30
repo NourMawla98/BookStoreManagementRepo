@@ -12,6 +12,8 @@ namespace BookStoreManagement.Domain.DTOs
         // The ID of the author associated with the book
         public int AuthorId { get; set; }
 
+        public string AuthorName { get; set; } 
+
         // Optionally, you can add publishers here, if needed
         public List<BookPuplisherDTO> Publishers { get; set; } = new List<BookPuplisherDTO>();
     }

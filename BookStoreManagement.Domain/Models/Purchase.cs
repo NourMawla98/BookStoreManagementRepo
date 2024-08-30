@@ -20,7 +20,9 @@
         public virtual Book Book { get; set; }
 
         [Column("book_price"), Required, Range(0.01, double.MaxValue, ErrorMessage = "Book price must be greater than zero.")]
+        [DisplayFormat(DataFormatString = "{0:F2}")]
         public decimal Bookprice { get; set; }
+
 
         [Column("quantity"), Required, Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
         public int Quantity { get; set; }
