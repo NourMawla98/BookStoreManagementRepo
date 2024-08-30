@@ -1,4 +1,5 @@
 using BookStoreManagement.API.Extensions;
+using BookStoreManagement.API.Middleware;
 using BookStoreManagement.Domain.Context;
 using BookStoreManagement.Service.Helpers.AutoMapper;
 using BookStoreManagement.Service.Interfaces;
@@ -42,10 +43,10 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 // Use CORS (make sure you have configured CORS policies if needed)
 app.UseCors();
-
-app.UseDeveloperExceptionPage();
 
 app.UseRouting();
 
