@@ -22,12 +22,15 @@ namespace BookStoreManagement.API.Controllers
             return Ok(await _authorService.GetAuthorsAsync());
         }
 
+
         // GET: api/Author/5
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetAuthorById(int id)
         {
-            return Ok(await _authorService.GetAuthorByIdAsync(id));
+            var author = await _authorService.GetAuthorByIdAsync(id);
+            return Ok(author);
         }
+
 
         // POST: api/Author
         [HttpPost]
@@ -38,7 +41,7 @@ namespace BookStoreManagement.API.Controllers
 
         // PUT: api/Author/5
         [HttpPut]
-        public async Task<IActionResult> PutAuthor([FromBody] GetAuthorDTO authorDto)
+        public async Task<IActionResult> PutAuthor([FromBody] GetAuthorListDTO authorDto)
         {
             return Ok(await _authorService.UpdateAuthorAsync(authorDto));
         }

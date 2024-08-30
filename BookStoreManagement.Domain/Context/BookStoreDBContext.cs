@@ -15,14 +15,12 @@ namespace BookStoreManagement.Domain.Context
         public virtual DbSet<Publisher> Publisher { get; set; }
         public virtual DbSet<Book> Book { get; set; }
         public virtual DbSet<BookPublisher> BookPublisher { get; set; }
+        public DbSet<Purchase> Purchase { get; set; }
 
         #endregion DBSets
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //foreach (var key in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
-            //    key.DeleteBehavior = DeleteBehavior.Restrict;
-
             base.OnModelCreating(modelBuilder);
         }
     }

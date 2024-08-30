@@ -4,6 +4,7 @@ using BookStoreManagement.Domain.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookStoreManagement.Domain.Migrations
 {
     [DbContext(typeof(BookStoreDBContext))]
-    partial class BookStoreDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240829104342_Book_Author_Publisher_Mig")]
+    partial class Book_Author_Publisher_Mig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -132,38 +135,6 @@ namespace BookStoreManagement.Domain.Migrations
                     b.ToTable("publisher");
                 });
 
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.Purchase", b =>
-                {
-                    b.Property<int>("PurchaseId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PurchaseId"));
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int")
-                        .HasColumnName("book_id");
-
-                    b.Property<decimal>("Bookprice")
-                        .HasColumnType("decimal(65,30)")
-                        .HasColumnName("book_price");
-
-                    b.Property<DateTime>("PurchaseDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("purchase_date");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int")
-                        .HasColumnName("quantity");
-
-                    b.HasKey("PurchaseId");
-
-                    b.HasIndex("BookId");
-
-                    b.ToTable("purchase");
-                });
-
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Book", b =>
                 {
                     b.HasOne("BookStoreManagement.Domain.Models.Author", "Author")
@@ -192,17 +163,6 @@ namespace BookStoreManagement.Domain.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Publisher");
-                });
-
-            modelBuilder.Entity("BookStoreManagement.Domain.Models.Purchase", b =>
-                {
-                    b.HasOne("BookStoreManagement.Domain.Models.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("BookStoreManagement.Domain.Models.Author", b =>
